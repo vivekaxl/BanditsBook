@@ -82,7 +82,9 @@ for data in datas:
     print "UCB1"
     # for v, cn in zip(vm_types, algo3.counts):
     #     print v[:5], cn, "| ",
-    draw_historgram(algo2.counts, [v[:5] for v in vm_types], data, "UCB1")
+    draw_historgram(algo3.counts, [v[:5] for v in vm_types], data, "UCB1")
+
+    print
 
 
 
