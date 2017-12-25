@@ -31,6 +31,7 @@ def draw_historgram(x, y, name, method):
     plt.bar(range(len(x)), height=x)
     plt.xticks([xx for xx in range(len(x))], y, rotation=90)
     plt.title(name + " " + method)
+    plt.ylabel('Count')
     plt.savefig(name.replace('data', 'figures').replace('.csv', '') + "_" + method.replace(' ', '_') + '.png')
     plt.cla()
 
