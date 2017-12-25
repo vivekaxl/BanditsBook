@@ -22,7 +22,17 @@ from algorithms.hedge.hedge import *
 from testing_framework.tests import *
 import os
 import pandas as pd
+import matplotlib.pyplot as plt
+import os
 
+
+def draw_historgram(x, y, name, method):
+    plt.figure(figsize=(8, 6))
+    plt.bar(range(len(x)), height=x)
+    plt.xticks([xx for xx in range(len(x))], y, rotation=90)
+    plt.title(name + " " + method)
+    plt.savefig(name.replace('data', 'figures').replace('.csv', '') + "_" + method.replace(' ', '_') + '.png')
+    plt.cla()
 
 # Convenience functions
 def cloud_arms(data_file):
@@ -33,6 +43,8 @@ def cloud_arms(data_file):
         arms.append(CloudArm(content[vm_type].values.tolist()))
     return arms, vm_types
 
+
+os.system('rm -f ./figures/*')
 data_folder = "./data/"
 datas = [data_folder + d for d in os.listdir(data_folder) if '.csv' in d]
 
@@ -57,21 +69,22 @@ for data in datas:
 
     print data
     print "Epsilon Greedy"
-    for v, cn in zip(vm_types, algo1.counts):
-        print v[:5], cn, "| ",
-    print
+    # for v, cn in zip(vm_types, algo1.counts):
+    #     print v[:5], cn, "| ",
+    # print
+    draw_historgram(algo1.counts, [v[:5] for v in vm_types], data, "Epsilon Greedy")
 
     print "Softmax"
-    for v, cn in zip(vm_types, algo2.counts):
-        print v[:5], cn, "| ",
-    print
+    # for v, cn in zip(vm_types, algo2.counts):
+    #     print v[:5], cn, "| ",
+    draw_historgram(algo2.counts, [v[:5] for v in vm_types], data, "Softmax")
 
     print "UCB1"
-    for v, cn in zip(vm_types, algo3.counts):
-        print v[:5], cn, "| ",
-    print
+    # for v, cn in zip(vm_types, algo3.counts):
+    #     print v[:5], cn, "| ",
+    draw_historgram(algo2.counts, [v[:5] for v in vm_types], data, "UCB1")
 
-    raw_input()
+
 
 
 """
