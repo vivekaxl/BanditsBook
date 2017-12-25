@@ -13,9 +13,8 @@ class EpsilonGreedy():
     return
 
   def initialize(self, n_arms):
-    self.counts = [0 for col in range(n_arms)]
-    self.values = [0.0 for col in range(n_arms)]
-    return
+        self.counts = [0 for col in range(n_arms)]
+        self.values = [0.0 for col in range(n_arms)]
 
   def select_arm(self):
     if random.random() > self.epsilon:

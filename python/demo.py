@@ -50,6 +50,7 @@ os.system('rm -f ./figures/*')
 data_folder = "./data/"
 datas = [data_folder + d for d in os.listdir(data_folder) if '.csv' in d]
 
+# Ground Truth
 rot = {
     './data/spark15_time.csv': ['r4.2xlarge', 'm4.2xlarge', 'm3.2xlarge'],
     './data/spark15_cost.csv': ['m4.xlarge', 'm4.large', 'c4.xlarge'],

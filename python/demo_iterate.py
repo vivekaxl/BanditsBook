@@ -62,9 +62,9 @@ rot = {
 
 
 for data in datas:
-    reps = 1
+    reps = 30
     trials = 50
-    iterate = 1
+    iterate = 2
     collector = {}
     for rep in xrange(reps):
         arms, vm_types = cloud_arms(data)
@@ -72,8 +72,11 @@ for data in datas:
         algo1 = EpsilonGreedy(0.1, [], [])
         algo2 = Softmax(1.0, [], [])
         algo3 = UCB1([], [])
+        algo4 = EpsilonGreedy(0.2, [], [])
+        algo5 = EpsilonGreedy(0.3, [], [])
+        algo6 = EpsilonGreedy(0.4, [], [])
 
-        algos = [algo1, algo2, algo3]
+        algos = [algo1, algo2, algo3, algo4, algo5, algo6]
 
         for algo in algos:
             algo.initialize(n_arms)
@@ -91,14 +94,23 @@ for data in datas:
         # find the recommend vm_instances
         for algo in algos:
             if algo.name not in collector:
-                collector[algo.name] = [vm_types[algo.counts.index(max(algo.counts))]]
-            else:
-                collector[algo.name].append(vm_types[algo.counts.index(max(algo.counts))])
+                collector[algo.name] = {'Present': 0, 'Absent': 0}
 
+            if vm_types[algo.counts.index(max(algo.counts))] in rot[data]:
+                collector[algo.name]['Present'] += 1
+            else:
+                collector[algo.name]['Absent'] += 1
+
+    print data, '|',
+    for key in sorted(collector.keys()):
+        print  collector[key]['Present'], '|', collector[key]['Absent'], '|',
     print
-    print data, rot[data]
-    for key in collector.keys():
-        print key, collections.Counter(collector[key])
+
+# print data,"|",
+# for k in sorted(collector.keys()):
+#     print k+'_p','|', k+'_a', '|',
+# print
+
 
 """
 num_sims = 1000
