@@ -6,6 +6,7 @@ def ind_max(x):
 
 class EpsilonGreedy():
   def __init__(self, epsilon, counts, values):
+    self.name = "Epsilon_Greedy_" + str(epsilon)
     self.epsilon = epsilon
     self.counts = counts
     self.values = values

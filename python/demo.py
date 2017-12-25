@@ -24,6 +24,7 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import collections
 
 
 def draw_historgram(x, y, name, method):
@@ -49,46 +50,49 @@ os.system('rm -f ./figures/*')
 data_folder = "./data/"
 datas = [data_folder + d for d in os.listdir(data_folder) if '.csv' in d]
 
+rot = {
+    './data/spark15_time.csv': ['r4.2xlarge', 'm4.2xlarge', 'm3.2xlarge'],
+    './data/spark15_cost.csv': ['m4.xlarge', 'm4.large', 'c4.xlarge'],
+    './data/hadoop_time.csv': ['r4.2xlarge', 'r3.2xlarge', 'm4.2xlarge'],
+    './data/hadoop_cost.csv': ['m4.large', 'c4.large', 'm4.xlarge'],
+    './data/spark_time.csv': ['r4.2xlarge', 'm4.2xlarge', 'r3.2xlarge'],
+    './data/spark_cost.csv': ['m4.large', 'r4.large', 'm4.xlarge']
+}
+
+
 for data in datas:
-    arms, vm_types = cloud_arms(data)
-    n_arms = len(arms)
-    algo1 = EpsilonGreedy( 0.1, [], [])
-    algo2 = Softmax( 1.0, [], [])
-    algo3 = UCB1( [], [])
-    # algo4 = Exp3( 0.2, [])
+    reps = 30
+    trials = 50
+    collector = {}
+    for rep in xrange(reps):
+        arms, vm_types = cloud_arms(data)
+        n_arms = len(arms)
+        algo1 = EpsilonGreedy(0.1, [], [])
+        algo2 = Softmax(1.0, [], [])
+        algo3 = UCB1([], [])
 
-    algos = [algo1, algo2, algo3]
+        algos = [algo1, algo2, algo3]
 
-    for algo in algos:
-      algo.initialize(n_arms)
+        for algo in algos:
+            algo.initialize(n_arms)
 
-    for t in range(40):
-      for algo in algos:
-        chosen_arm = algo.select_arm()
-        reward = arms[chosen_arm].draw()
-        algo.update(chosen_arm, reward)
+        for t in range(trials):
+          for algo in algos:
+            chosen_arm = algo.select_arm()
+            reward = arms[chosen_arm].draw()
+            algo.update(chosen_arm, reward)
 
-    print data
-    print "Epsilon Greedy"
-    # for v, cn in zip(vm_types, algo1.counts):
-    #     print v[:5], cn, "| ",
-    # print
-    draw_historgram(algo1.counts, [v[:5] for v in vm_types], data, "Epsilon Greedy")
-
-    print "Softmax"
-    # for v, cn in zip(vm_types, algo2.counts):
-    #     print v[:5], cn, "| ",
-    draw_historgram(algo2.counts, [v[:5] for v in vm_types], data, "Softmax")
-
-    print "UCB1"
-    # for v, cn in zip(vm_types, algo3.counts):
-    #     print v[:5], cn, "| ",
-    draw_historgram(algo3.counts, [v[:5] for v in vm_types], data, "UCB1")
+        # find the recommend vm_instances
+        for algo in algos:
+            if algo.name not in collector:
+                collector[algo.name] = [vm_types[algo.counts.index(max(algo.counts))]]
+            else:
+                collector[algo.name].append(vm_types[algo.counts.index(max(algo.counts))])
 
     print
-
-
-
+    print data, rot[data]
+    for key in collector.keys():
+        print key, collections.Counter(collector[key])
 
 """
 num_sims = 1000

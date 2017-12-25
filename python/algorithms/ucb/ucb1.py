@@ -6,6 +6,7 @@ def ind_max(x):
 
 class UCB1():
   def __init__(self, counts, values):
+    self.name = "UCB1"
     self.counts = counts
     self.values = values
     return

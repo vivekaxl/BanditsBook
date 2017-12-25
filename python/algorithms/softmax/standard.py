@@ -14,6 +14,7 @@ def categorical_draw(probs):
 
 class Softmax:
   def __init__(self, temperature, counts, values):
+    self.name = "SoftMax_" + str(temperature)
     self.temperature = temperature
     self.counts = counts
     self.values = values
