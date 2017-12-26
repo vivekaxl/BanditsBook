@@ -48,17 +48,20 @@ def cloud_arms(data_file):
 
 os.system('rm -f ./figures/*')
 data_folder = "./data/"
-datas = [data_folder + d for d in os.listdir(data_folder) if '.csv' in d]
+datas = [data_folder + d for d in os.listdir(data_folder) if '.csv' in d] #
 
 # Ground Truth
 rot = {
+    './data/all_time.csv': ['c3.large', 'r4.2xlarge', 'm4.2xlarge'],
     './data/spark15_time.csv': ['r4.2xlarge', 'm4.2xlarge', 'm3.2xlarge'],
     './data/spark15_cost.csv': ['m4.xlarge', 'm4.large', 'c4.xlarge'],
     './data/hadoop_time.csv': ['r4.2xlarge', 'r3.2xlarge', 'm4.2xlarge'],
+    './data/all_cost.csv': ['c3.large', 'm4.large', 'm4.xlarge'],
     './data/hadoop_cost.csv': ['m4.large', 'c4.large', 'm4.xlarge'],
     './data/spark_time.csv': ['r4.2xlarge', 'm4.2xlarge', 'r3.2xlarge'],
     './data/spark_cost.csv': ['m4.large', 'r4.large', 'm4.xlarge']
 }
+
 
 
 for data in datas:
@@ -75,8 +78,12 @@ for data in datas:
         algo4 = EpsilonGreedy(0.2, [], [])
         algo5 = EpsilonGreedy(0.3, [], [])
         algo6 = EpsilonGreedy(0.4, [], [])
+        algo7 = Softmax(0.1, [], [])
+        algo8 = Softmax(0.2, [], [])
+        algo9 = Softmax(0.4, [], [])
+        algo10 = Softmax(0.8, [], [])
 
-        algos = [algo1, algo2, algo3, algo4, algo5, algo6]
+        algos = [algo1, algo2, algo3, algo4, algo5, algo6, algo7, algo8, algo9, algo10]
 
         for algo in algos:
             algo.initialize(n_arms)

@@ -4,6 +4,8 @@ import random
 class CloudArm():
     def __init__(self, data):
         self.data = [1/d for d in data]
+        for d in self.data:
+            assert(d <= 1), "Something is wrong"
         # used to keep track
         self.counts = [0 for _ in xrange(len(self.data))]
 
