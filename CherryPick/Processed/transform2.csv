@@ -1,0 +1,13 @@
+id,name,disk_count,speed,cost,size,name,ram,cpu_count,speed,cost
+1,ebs,2,slow,0.12,500,c4.2xlarge,15,8,fast,0.552
+2,ebs,2,slow,0.12,500,c4.large,3.75,2,fast,0.138
+3,ebs,2,slow,0.12,500,c4.xlarge,7.5,4,fast,0.276
+4,local,2,fast,0,500,i2.2xlarge,61,8,slow,1.876
+5,local,2,fast,0,500,i2.xlarge,30.5,4,slow,0.938
+6,ebs,2,slow,0.12,500,m4.2xlarge,32,8,slow,0.588
+7,ebs,2,slow,0.12,500,m4.large,8,2,slow,0.147
+8,ebs,2,slow,0.12,500,m4.xlarge,16,4,slow,0.294
+9,ebs,2,slow,0.12,500,r3.2xlarge,61,8,slow,0.78
+10,ebs,2,slow,0.12,500,r3.large,15.25,2,slow,0.195
+11,ebs,2,slow,0.12,500,r3.xlarge,30.5,4,slow,0.39
+12,local,3,fast,0,500,i2.2xlarge,61,8,slow,1.876
