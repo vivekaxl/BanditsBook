@@ -1,0 +1,4 @@
+id,name,disk_count,speed,cost,size
+1,ebs,2,slow,0.12,500
+2,local,2,fast,0,500
+3,local,3,fast,0,500

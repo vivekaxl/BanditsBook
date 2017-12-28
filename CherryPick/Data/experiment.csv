@@ -1,0 +1,17 @@
+id,name
+1,kmeans
+2,spark
+3,terasort-05
+4,terasort-10
+5,terasort-100
+6,terasort-125
+7,terasort-150
+8,terasort-20
+9,terasort-40
+10,terasort-50
+11,terasort-640
+12,terasort-75
+13,terasort-80
+14,terasort
+15,tpcds
+16,tpch
