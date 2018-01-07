@@ -104,6 +104,7 @@ def run(iterate, trials, reps=30):
                     collector[algo.name]['Present'] += 1
                 else:
                     collector[algo.name]['Absent'] += 1
+            print algo10.counts
 
         return collector
 
