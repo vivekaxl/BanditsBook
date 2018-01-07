@@ -48,7 +48,7 @@ def cloud_arms(data_file):
 
 os.system('rm -f ./figures/*')
 data_folder = "./data/"
-datas = [data_folder + d for d in os.listdir(data_folder) if '.csv' in d] #
+datas = [data_folder + d for d in sorted(os.listdir(data_folder)) if '.csv' in d] #
 
 # Ground Truth
 rot = {
@@ -63,55 +63,49 @@ rot = {
 }
 
 
+def run(iterate, trials, reps=30):
+    for data in datas:
+        collector = {}
+        for rep in xrange(reps):
+            arms, vm_types = cloud_arms(data)
+            n_arms = len(arms)
+            algo1 = EpsilonGreedy(0.1, [], [])
+            algo2 = Softmax(1.0, [], [])
+            algo3 = UCB1([], [])
+            algo4 = EpsilonGreedy(0.2, [], [])
+            algo5 = EpsilonGreedy(0.3, [], [])
+            algo6 = EpsilonGreedy(0.4, [], [])
+            algo7 = Softmax(0.1, [], [])
+            algo8 = Softmax(0.2, [], [])
+            algo9 = Softmax(0.4, [], [])
+            algo10 = Softmax(0.8, [], [])
 
-for data in datas:
-    reps = 30
-    trials = 50
-    iterate = 2
-    collector = {}
-    for rep in xrange(reps):
-        arms, vm_types = cloud_arms(data)
-        n_arms = len(arms)
-        algo1 = EpsilonGreedy(0.1, [], [])
-        algo2 = Softmax(1.0, [], [])
-        algo3 = UCB1([], [])
-        algo4 = EpsilonGreedy(0.2, [], [])
-        algo5 = EpsilonGreedy(0.3, [], [])
-        algo6 = EpsilonGreedy(0.4, [], [])
-        algo7 = Softmax(0.1, [], [])
-        algo8 = Softmax(0.2, [], [])
-        algo9 = Softmax(0.4, [], [])
-        algo10 = Softmax(0.8, [], [])
+            algos = [algo1, algo2, algo3, algo4, algo5, algo6, algo7, algo8, algo9, algo10]
 
-        algos = [algo1, algo2, algo3, algo4, algo5, algo6, algo7, algo8, algo9, algo10]
+            for algo in algos:
+                algo.initialize(n_arms)
+                for iter in xrange(iterate):
+                    for arm in xrange(n_arms):
+                        reward = arms[arm].draw()
+                        algo.update(arm, reward)
 
-        for algo in algos:
-            algo.initialize(n_arms)
-            for iter in xrange(iterate):
-                for arm in xrange(n_arms):
-                    reward = arms[arm].draw()
-                    algo.update(arm, reward)
+            for t in range(trials):
+              for algo in algos:
+                chosen_arm = algo.select_arm()
+                reward = arms[chosen_arm].draw()
+                algo.update(chosen_arm, reward)
 
-        for t in range(trials):
-          for algo in algos:
-            chosen_arm = algo.select_arm()
-            reward = arms[chosen_arm].draw()
-            algo.update(chosen_arm, reward)
+            # find the recommend vm_instances
+            for algo in algos:
+                if algo.name not in collector:
+                    collector[algo.name] = {'Present': 0, 'Absent': 0}
 
-        # find the recommend vm_instances
-        for algo in algos:
-            if algo.name not in collector:
-                collector[algo.name] = {'Present': 0, 'Absent': 0}
+                if vm_types[algo.counts.index(max(algo.counts))] in rot[data]:
+                    collector[algo.name]['Present'] += 1
+                else:
+                    collector[algo.name]['Absent'] += 1
 
-            if vm_types[algo.counts.index(max(algo.counts))] in rot[data]:
-                collector[algo.name]['Present'] += 1
-            else:
-                collector[algo.name]['Absent'] += 1
-
-    print data, '|',
-    for key in sorted(collector.keys()):
-        print  collector[key]['Present'], '|', collector[key]['Absent'], '|',
-    print
+        return collector
 
 # print data,"|",
 # for k in sorted(collector.keys()):
@@ -119,8 +113,17 @@ for data in datas:
 # print
 
 
-"""
-num_sims = 1000
-horizon = 10
-results = test_algorithm(algo1, arms, num_sims, horizon)
-"""
+all_iterates = [0, 1, 2]
+all_trials = [20+i for i in xrange(1, 40)]
+
+all_results = {}
+for iterate in all_iterates:
+    all_results[iterate] = {}
+    for trail in all_trials:
+        print '. ',
+        ret = run(iterate, trail)
+        all_results[iterate][trail] = ret
+    print
+
+import pickle
+pickle.dump(all_results, open('./PickleFolder/all_results.p', 'w'))
