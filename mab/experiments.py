@@ -4,10 +4,12 @@ import pandas as pd
 from mab.algorithms import *
 
 
-def load_db(data_path):
+def load_db(data_path, shuffled=True):
     db = pd.read_csv(data_path)
     db = db.set_index(['framework', 'workload', 'datasize'])
     db = 1 / db
+    if shuffled:
+        db = db.sample(frac=1, axis=0).sample(frac=1, axis=1)
     return db
 
 
@@ -19,18 +21,18 @@ def export_result(algo):
         workload_rewards = workload_rewards[workload_rewards > 0]
         # print(workload_rewards)
         if len(workload_rewards) > 0:
-            print('1)', workload_rewards.index.tolist())
-            print('#', 1.0 / workload_rewards.max())
-            print('@', workload_rewards.idxmax())
+            #print('1)', workload_rewards.index.tolist())
+            #print('#', 1.0 / workload_rewards.max())
+            #print('@', workload_rewards.idxmax())
             result[workload] = {
                 'steps': workload_rewards.index.tolist(),
                 'selected_performance': 1.0 / workload_rewards.max(),
                 'selected_config': workload_rewards.idxmax(),
             }
         else:
-            print('2)', best_config)
-            print('#', 1.0 / algo.db.ix[workload, best_config])
-            print('@', best_config)
+            #print('2)', best_config)
+            #print('#', 1.0 / algo.db.ix[workload, best_config])
+            #print('@', best_config)
             result[workload] = {
                 'steps': [],
                 'selected_performance': 1.0 / algo.db.ix[workload, best_config],
@@ -70,12 +72,17 @@ def run_quick_explore(algo, num_trials, num_init_iterations):
     for _ in range(num_init_iterations):
         algo.init()
     print('init:', algo.count.sum().sum())
-    print(algo.count.sum(axis=0))
+    display(algo.count.sum().sort(inplace=False))
+    display(algo.reward.mean().sort(inplace=False))
+    display(algo.count.sum(axis=1))
 
     # Step 2: run the algorithm
     for _ in range(num_trials):
         algo.smart_pull()
     print('pull:', algo.count.sum().sum())
+    display(algo.count.sum().sort(inplace=False))
+    display(algo.reward.mean().sort(inplace=False))
+    display(algo.count.sum(axis=1))
 
     try:
         result = export_result(algo)
@@ -109,6 +116,18 @@ def run_full_search(algo, num_trials, num_init_iterations):
 
     try:
         result = export_result(algo)
+        return result
+    except Exception as e:
+        print(e)
+        return algo.count
+
+
+def run_random_search(method, num_trials):
+    for t in range(num_trials):
+        method.pull()
+
+    try:
+        result = export_result(method)
         return result
     except Exception as e:
         print(e)
