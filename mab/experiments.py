@@ -13,6 +13,21 @@ def load_db(data_path, shuffled=True):
     return db
 
 
+def export_result_quick(algo):
+    #print('export quick!!!')
+    result = {}
+    best_config = algo.reward.mean().idxmax()
+    for workload in algo.reward.index:
+        workload_rewards = algo.reward.ix[workload, :]
+        workload_rewards = workload_rewards[workload_rewards > 0]
+        result[workload] = {
+            'steps': workload_rewards.index.tolist(),
+            'selected_performance': 1.0 / algo.db.at[workload, best_config],
+            'selected_config': best_config,
+        }
+    return result
+
+
 def export_result(algo):
     result = {}
     best_config = algo.reward.mean().idxmax()
@@ -42,7 +57,7 @@ def export_result(algo):
     return result
 
 
-def run_parallel(db, method_class, method_parameters, num_trials, num_init_iterations, mode='quick', num_repetitions=10, statistics_method='mean'):
+def run_parallel(db, method_class, method_parameters, num_trials, num_init_iterations, report_mode='quick', num_repetitions=10, statistics_method='mean'):
     df_records_performance = []
     df_records_steps = []
 
@@ -51,8 +66,8 @@ def run_parallel(db, method_class, method_parameters, num_trials, num_init_itera
             method = method_class(db, method_parameters)
         else:
             method = method_class(db)
-        func = run_quick_explore if mode == 'quick' else run_full_search
-        result = func(method, num_trials, num_init_iterations)
+        func = run
+        result = func(method, num_trials, num_init_iterations, report_mode=report_mode)
         df = pd.DataFrame({k: {'selected_performance': result[k]['selected_performance'], 'steps': len(result[k]['steps'])} for k in result.keys()}).T
         df_records_performance.append(df['selected_performance'])
         df_records_steps.append(df['steps'])
@@ -62,6 +77,37 @@ def run_parallel(db, method_class, method_parameters, num_trials, num_init_itera
         df_record = pd.concat([pd.concat(df_records_performance, axis=1).mean(axis=1), pd.concat(df_records_steps, axis=1).mean(axis=1)], keys=['selected_performance', 'steps'], axis=1)
 
     return df_record
+
+
+def run(algo, num_trials, num_init_iterations, report_mode='quick'):
+    print('trials:', num_trials)
+    print('iterate:', num_init_iterations)
+
+    # Step 1: try every arm in each iteration
+    for _ in range(num_init_iterations):
+        algo.init()
+    print('init:', algo.count.sum().sum())
+    display(algo.count.sum().sort(inplace=False))
+    display(algo.reward.mean().sort(inplace=False))
+    display(algo.count.sum(axis=1))
+
+    # Step 2: run the algorithm
+    for _ in range(num_trials):
+        algo.smart_pull()
+    print('pull:', algo.count.sum().sum())
+    display(algo.count.sum().sort(inplace=False))
+    display(algo.reward.mean().sort(inplace=False))
+    display(algo.count.sum(axis=1))
+
+    try:
+        if report_mode == 'quick':
+            result = export_result_quick(algo)
+        elif report_mode == 'full':
+            result = export_result(algo)
+        return result
+    except Exception as e:
+        print(e)
+        return algo.count
 
 
 def run_quick_explore(algo, num_trials, num_init_iterations):
@@ -85,7 +131,8 @@ def run_quick_explore(algo, num_trials, num_init_iterations):
     display(algo.count.sum(axis=1))
 
     try:
-        result = export_result(algo)
+        #result = export_result(algo)
+        result = export_result_quick(algo)
         return result
     except Exception as e:
         print(e)
@@ -122,12 +169,15 @@ def run_full_search(algo, num_trials, num_init_iterations):
         return algo.count
 
 
-def run_random_search(method, num_trials):
+def run_random_search(method, num_trials, report_mode='quick'):
     for t in range(num_trials):
         method.pull()
 
     try:
-        result = export_result(method)
+        if report_mode == 'quick':
+            result = export_result_quick(method)
+        elif report_mode == 'full':
+            result = export_result(method)
         return result
     except Exception as e:
         print(e)
